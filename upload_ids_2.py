@@ -10,7 +10,7 @@ credentials = AuthCredentials(user_file="bot")
 site = EsportsClient('fortnite-esports', credentials=credentials)
 summary = 'Bot edit'
 
-with open('SA_IDs.csv', 'r') as f:
+with open('SA_IDs.csv', 'r', encoding='utf-8') as f:
     id_reader = csv.reader(f)
     for row in id_reader:
         print(row)
