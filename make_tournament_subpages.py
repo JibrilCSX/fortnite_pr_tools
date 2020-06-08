@@ -19,10 +19,10 @@ summary = 'Automatically creating subpages/dependent pages'
 credentials = AuthCredentials(user_file="bot")
 site = EsportsClient('fortnite-esports', credentials=credentials)  # Set wiki
 
-startat_page = 'Zamas'
+startat_page = 'Qlut0'
 passed_startat = False
 
-for page in site.pages_using('Infobox Player'):
+for i, page in enumerate(site.pages_using('Infobox Player')):
     if page.name == startat_page:
         passed_startat = True
     if not passed_startat:
