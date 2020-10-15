@@ -23,7 +23,7 @@ result = site.cargo_client.query(
     tables='TournamentResults=TR,TournamentResults__RosterLinks=RL,_pageData=PD,Tournaments=T',
     join_on='TR._ID=RL._rowID,RL._value=PD._pageName,TR.OverviewPage=T._pageName',
     where='PD._pageName IS NULL AND RL._value IS NOT NULL AND TR.PRPoints > "0"',
-    fields='RL._value=name,T.Region=res, TR.RosterLinks=RosterLinks, TR.RosterIds=RosterIds',
+    fields='RL._value=name,T.Region=res, TR.RosterLinks__full=RosterLinks, TR.RosterIds__full=RosterIds',
     group_by='RL._value',
     limit='max'
 )
@@ -42,18 +42,20 @@ for template in wikitext.filter_templates():
 
 lmt = 0
 for item in result:
+    print(item)
     if lmt == limit:
         break
     lmt = lmt + 1
     name = item['name']
-    print(name)
-    print(item)
+    if not quiet:
+        print(name)
+        print(item)
     res = item['res']
     idx = None
-    if isinstance(item['RosterLinks'], str):
-        idx = item['RosterIds']
+    item['RosterLinks'] = item['RosterLinks'].split(';;')
+    item['RosterIds'] = item['RosterIds'].split(';;')
     for i, namex in enumerate(item['RosterLinks']):
-        if namex == name:
+        if namex.strip() == name:
             idx = item['RosterIds'][i]
             break
     if name == '0':
@@ -67,10 +69,24 @@ for item in result:
             continue
         if not quiet:
             print('Processing page %s...' % name)
-        this_template.add('residency', res)
-        this_template.add('id', name)
+        
+        # if we know the player id and they don't have a page yet
         if idx is not None:
             this_template.add('fortnite_id', idx)
+            
+            # see if they have a page under a different name
+            original_page_name = site.cargo_client.query_one_result(
+                tables="Players",
+                fields="_pageName=\"Page\"",
+                where='FortniteId="{}"'.format(idx)
+            )
+            
+            # if so then move it to the new name (dw about fixing double redirects, whatever)
+            if original_page_name is not None:
+                site.client.pages[original_page_name].move(name)
+                continue
+        this_template.add('residency', res)
+        this_template.add('id', name)
         text = str(wikitext)
         page.save(text, summary=summary)
     except Exception as e:
