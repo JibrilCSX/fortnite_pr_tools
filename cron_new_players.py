@@ -82,9 +82,9 @@ for item in result:
             )
             
             # if so then move it to the new name (dw about fixing double redirects, whatever)
-            if original_page_name is not None:
-                site.client.pages[original_page_name].move(name)
-                continue
+            # if original_page_name is not None:
+            #     site.client.pages[original_page_name].move(name)
+            #     continue
         this_template.add('residency', res)
         this_template.add('id', name)
         text = str(wikitext)
