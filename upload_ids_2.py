@@ -27,6 +27,6 @@ with open('SA_IDs.csv', 'r', encoding='utf-8') as f:
             time.sleep(1)
             print('Saving page %s....' % page.name)
             try:
-                page.save(new_text, summary="Adding fortnite ID")
+                site.save(page, new_text, summary="Adding fortnite ID")
             except ProtectedPageError:
                 continue

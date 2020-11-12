@@ -65,7 +65,7 @@ for item in result:
         if page.text() != '':
             if not quiet:
                 print('Page %s already exists, skipping' % name)
-            page.save(page.text())
+            site.save(page, page.text())
             continue
         if not quiet:
             print('Processing page %s...' % name)
@@ -88,7 +88,7 @@ for item in result:
         this_template.add('residency', res)
         this_template.add('id', name)
         text = str(wikitext)
-        page.save(text, summary=summary)
+        site.save(page, text, summary=summary)
     except Exception as e:
         time.sleep(10)
         site.client.pages['User:RheingoldRiver/auto players errors'].append('\n' + str(e) + ', player: ' + name)

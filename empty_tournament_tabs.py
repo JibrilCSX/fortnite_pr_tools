@@ -13,4 +13,4 @@ for page in site.pages_using('Infobox Tournament'):
     text = page.text()
     if 'Tabs}}' not in text:
         text = '{{EmptyTournamentTabs}}\n' + text
-        page.save(text, summary="Adding EmptyTournamentTabs")
+        site.save(page, text, summary="Adding EmptyTournamentTabs")
