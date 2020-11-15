@@ -2,6 +2,7 @@ from river_mwclient.esports_client import EsportsClient
 from river_mwclient.auth_credentials import AuthCredentials
 import mwparserfromhell
 from mwclient.page import Page
+from mwclient.errors import EditError
 
 PLAYERS_PER_SQUAD = 4
 CURRENT_YEAR = 2020
@@ -84,7 +85,10 @@ def update_and_save(page, lookup):
     newtext = str(wikitext)
     if text != newtext:
         # print('Saving page %s...' % page.name)
-        site.save(page, newtext, summary=summary)
+        try:
+            site.save(page, newtext, summary=summary)
+        except EditError:
+            site.log_error_content(page.name, 'Spam filter prohibited squad point update')
     else:
         pass
     # print('Skipping page %s...' % page.name)
