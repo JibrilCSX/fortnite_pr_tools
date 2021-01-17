@@ -28,6 +28,7 @@ class PointUpdater(object):
         # we will assume that LPC name exactly matches player page name
         # otherwise we need an extra copy of PR and ew
         table_list = [
+            "Teams",
             "ListplayerCurrent=LPC",
             "PlayerRedirects=PR",
             "TournamentResults__RosterLinks=RL",
@@ -35,6 +36,7 @@ class PointUpdater(object):
             "Tournaments=T"
         ]
         join_list = [
+            "Teams._pageName=LPC._pageName",
             "LPC.Link=PR._pageName",
             "PR.AllName=RL._value",
             "RL._rowID=Res._ID",
@@ -44,7 +46,8 @@ class PointUpdater(object):
             'LPC._pageName="%s"' % page.name,
             '(T.Date >= "{}-01-01" AND T.Date <= "{}-12-31")'.format(
                 self.CURRENT_YEAR_STR, self.CURRENT_YEAR_STR
-            )
+            ),
+            "Teams.Region=T.Region",
         ]
         pr_platform = self.get_prplatform(page)
         if pr_platform is not None:
