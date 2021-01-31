@@ -8,7 +8,7 @@ from mwclient.errors import EditError
 class PointUpdater(object):
     SUMMARY = 'Automatic Squad Update'  # Set summary
     PLAYERS_PER_SQUAD = 4
-    CURRENT_YEAR = 2020
+    CURRENT_YEAR = 2021
     CURRENT_YEAR_STR = str(CURRENT_YEAR)
 
     def __init__(self, site: EsportsClient):
