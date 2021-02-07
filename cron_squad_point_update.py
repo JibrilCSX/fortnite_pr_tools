@@ -47,7 +47,7 @@ class PointUpdater(object):
             '(T.Date >= "{}-01-01" AND T.Date <= "{}-12-31")'.format(
                 self.CURRENT_YEAR_STR, self.CURRENT_YEAR_STR
             ),
-            "Teams.Region=T.Region",
+            "Teams.Region=T.PrRegion",
         ]
         pr_platform = self.get_prplatform(page)
         if pr_platform is not None:
