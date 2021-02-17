@@ -8,6 +8,7 @@ quiet = True
 credentials = AuthCredentials(user_file="me")
 site = EsportsClient('fortnite', credentials=credentials)  # set wiki
 summary = 'Automatically create player pages for Power Rankings'
+summary2 = 'Automatically changing infobox name after moving page'
 
 # RosterIds and RosterLinks should obviously be its own table
 # but the table schema sucks and I don't want to redesign the entire thing
@@ -23,7 +24,7 @@ result = site.cargo_client.query(
     tables='TournamentResults=TR,TournamentResults__RosterLinks=RL,_pageData=PD,Tournaments=T',
     join_on='TR._ID=RL._rowID,RL._value=PD._pageName,TR.OverviewPage=T._pageName',
     where='PD._pageName IS NULL AND RL._value IS NOT NULL AND TR.PRPoints > "0"',
-    fields='RL._value=name,T.Region=res, TR.RosterLinks__full=RosterLinks, TR.RosterIds__full=RosterIds',
+    fields='RL._value=name,T.Region=res, TR.RosterLinks__full=RosterLinks, TR.RosterIds__full=RosterIds,TR.OverviewPage=overview',
     group_by='RL._value',
     limit='max'
 )
@@ -61,6 +62,10 @@ for item in result:
     if name == '0':
         continue
     try:
+        if "&quot;" in name:
+            if not quiet:
+                print('Illegal character in Name %s, skipping' % name)
+            continue
         page = site.client.pages[name]
         if page.text() != '':
             if not quiet:
@@ -69,22 +74,32 @@ for item in result:
             continue
         if not quiet:
             print('Processing page %s...' % name)
-        
+
         # if we know the player id and they don't have a page yet
         if idx is not None:
             this_template.add('fortnite_id', idx)
-            
+
             # see if they have a page under a different name
             original_page_name = site.cargo_client.query_one_result(
                 tables="Players",
                 fields="_pageName=\"Page\"",
                 where='FortniteId="{}"'.format(idx)
             )
-            
+
             # if so then move it to the new name (dw about fixing double redirects, whatever)
-            # if original_page_name is not None:
-            #     site.client.pages[original_page_name].move(name)
-            #     continue
+            if original_page_name is not None:
+                site.client.pages[original_page_name].move(name)
+                site.client.pages["Data:{}".format(item['overview'])].touch()
+                site.client.pages[original_page_name].touch()
+                this_wikitext = mwparserfromhell.parse(site.client.pages[name].text())
+                for template in this_wikitext.filter_templates():
+                    if template.name.matches('Infobox Player'):
+                        template.add('id', name)
+                        break
+                site.client.pages[name].edit(str(this_wikitext), summary=summary2)
+                site.client.pages[name].purge()
+                continue
+
         this_template.add('residency', res)
         this_template.add('id', name)
         text = str(wikitext)
