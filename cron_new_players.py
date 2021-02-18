@@ -8,7 +8,7 @@ quiet = True
 credentials = AuthCredentials(user_file="me")
 site = EsportsClient('fortnite', credentials=credentials)  # set wiki
 summary = 'Automatically create player pages for Power Rankings'
-summary2 = 'Automatically changing infobox name after moving page'
+summary2 = 'Automatically creating redirect for Power Rankings'
 
 # RosterIds and RosterLinks should obviously be its own table
 # but the table schema sucks and I don't want to redesign the entire thing
@@ -80,24 +80,19 @@ for item in result:
             this_template.add('fortnite_id', idx)
 
             # see if they have a page under a different name
-            original_page_name = site.cargo_client.query_one_result(
+            target_page_name = site.cargo_client.query_one_result(
                 tables="Players",
                 fields="_pageName=\"Page\"",
                 where='FortniteId="{}"'.format(idx)
             )
 
             # if so then move it to the new name (dw about fixing double redirects, whatever)
-            if original_page_name is not None:
-                site.client.pages[original_page_name].move(name)
+            if target_page_name is not None:
+                site.client.pages[name].save("#REDIRECT[{}]".format(target_page_name), summary=summary2)
                 site.client.pages['tournament'].touch()
-                site.client.pages[original_page_name].touch()
-                this_wikitext = mwparserfromhell.parse(site.client.pages[name].text())
-                for template in this_wikitext.filter_templates():
-                    if template.name.matches('Infobox Player'):
-                        template.add('id', name)
-                        break
-                site.client.pages[name].edit(str(this_wikitext), summary=summary2)
-                site.client.pages[name].purge()
+                site.client.pages[name].touch()
+                site.client.pages[target_page_name].touch()
+                site.client.pages[target_page_name].purge()
                 continue
 
         this_template.add('residency', res)
