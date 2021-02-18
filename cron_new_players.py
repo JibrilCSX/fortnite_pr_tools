@@ -24,7 +24,7 @@ result = site.cargo_client.query(
     tables='TournamentResults=TR,TournamentResults__RosterLinks=RL,_pageData=PD,Tournaments=T',
     join_on='TR._ID=RL._rowID,RL._value=PD._pageName,TR.OverviewPage=T._pageName',
     where='PD._pageName IS NULL AND RL._value IS NOT NULL AND TR.PRPoints > "0"',
-    fields='RL._value=name,T.Region=res, TR.RosterLinks__full=RosterLinks, TR.RosterIds__full=RosterIds,TR.OverviewPage=overview',
+    fields='TR._pageName=tournament,RL._value=name,T.Region=res, TR.RosterLinks__full=RosterLinks, TR.RosterIds__full=RosterIds',
     group_by='RL._value',
     limit='max'
 )
@@ -89,7 +89,7 @@ for item in result:
             # if so then move it to the new name (dw about fixing double redirects, whatever)
             if original_page_name is not None:
                 site.client.pages[original_page_name].move(name)
-                site.client.pages["Data:{}".format(item['overview'])].touch()
+                site.client.pages['tournament'].touch()
                 site.client.pages[original_page_name].touch()
                 this_wikitext = mwparserfromhell.parse(site.client.pages[name].text())
                 for template in this_wikitext.filter_templates():
