@@ -33,10 +33,10 @@ for item in result:
         if namex.strip() == name:
             idx = item['RosterIds'][i]
             break
-    if idx is None or len(idx) != 32 or idx == name:  # Checks if the id is 32 character long
+    if idx is None or len(idx) != 32 or idx == name:  # Checking if the id is 32 character long
         continue
     try:
-        int(idx, 16)  # Checks if the id is hexadecimal
+        int(idx, 16)  # Checking if the id is hexadecimal
     except ValueError:
         continue
     page = site.client.pages[name]
@@ -47,9 +47,7 @@ for item in result:
     for template in wikitext.filter_templates():
         if template.name.matches("Infobox Player"):
             if template.has("fortnite_id"):
-                if not quiet:
-                    print("Skipped player %s. Might be a missing disambig." % name)
-                # Skips if the player already has a Fortnite ID
+                # Skips if the player already have a Fortnite ID
                 # if so, it might be a different player and has to be handled manually
                 # https://fortnite-esports.gamepedia.com/Maintenance:Players_With_Multiple_Fortnite_IDs
                 continue
